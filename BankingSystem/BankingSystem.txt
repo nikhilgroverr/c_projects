@@ -1,0 +1,230 @@
+#include<stdio.h>
+#include<conio.h>
+
+struct cust
+{
+	long int account_no;
+	char name[20];
+	char f_name[20];
+	char address[20];
+	long int balance;
+};
+
+struct trans
+{
+	long int account_no;
+	char t_type[10];
+	char date[10];
+	long int amount;
+};
+
+void cust_detail()
+{
+	FILE *fp;
+	struct cust c1;
+	clrscr();
+
+	if((fp=fopen("account","a+"))==NULL)
+	{
+	printf("Cannot open file");
+	exit(1);
+	}
+	printf("Enter Account no : ");
+	scanf("%ld",&c1.account_no);
+	fflush(stdin);
+	printf("Enter Name : ");
+	gets(c1.name);
+	fflush(stdin);
+	printf("Enter Father Name : ");
+	gets(c1.f_name);
+	fflush(stdin);
+	printf("Enter Address : ");
+	gets(c1.address);
+	printf("Enter Balance : ");
+	scanf("%ld",&c1.balance);
+
+	fwrite(&c1,sizeof(struct cust),1,fp);
+	fclose(fp);
+}
+
+void disp()
+{
+	FILE *fp;
+	struct cust c1;
+	if((fp=fopen("account","r"))==NULL)
+	{
+	printf("Cannot open file");
+	exit(1);
+	}
+
+	printf("Account no\tName\tF_Name\tAddress\tBalacne");
+	while((fread(&c1,sizeof(struct cust),1,fp))==1)
+	{
+	printf("\n%ld\t\t%s\t%s\t%s\t%ld",c1.account_no,c1.name,c1.f_name,c1.address,c1.balance);
+	}
+	fclose(fp);
+	getch();
+}
+
+void deposit()
+{
+	FILE *fp,*fp2;
+	char flag='y',found,val_flag;
+	struct cust c1;
+	struct trans t1;
+	int size=sizeof(struct cust);
+	clrscr();
+
+	if((fp=fopen("trans1","a+"))==NULL)
+	{
+	printf("Cannot open file");
+	exit(1);
+	}
+
+	if((fp2=fopen("account","r+w"))==NULL)
+	{
+	printf("Cannot open file");
+	exit(1);
+	}
+
+	printf("Enter Account no. : ");
+	scanf("%ld",&t1.account_no);
+	found='n';
+	val_flag='n';
+	rewind(fp2);
+
+	while((fread(&c1,sizeof(struct cust),1,fp2))==1 && found=='n')
+	{
+	if(c1.account_no==t1.account_no)
+	{
+	found='y';
+	break;
+	}
+	}
+	if(found=='y')
+	{
+	fflush(stdin);
+	printf("Enter date ");
+	gets(t1.date);
+	printf("Enter Amount ");
+	scanf("%ld",&t1.amount);
+	strcpy(t1.t_type,"deposit");
+
+	fwrite(&t1,sizeof(struct trans),1,fp);
+
+	c1.balance=c1.balance+t1.amount;
+	val_flag='y';
+	fwrite(&t1,sizeof(struct trans),1,fp);
+	fseek(fp2,(long)(-size),1);
+	fwrite(&c1,sizeof(struct cust),1,fp2);
+	}
+	fclose(fp);
+	fclose(fp2);
+}
+
+void withdrawl()
+{
+	FILE *fp,*fp2;
+	char flag='y',found,val_flag;
+	struct cust c1;
+	struct trans t1;
+	int size=sizeof(struct cust);
+	clrscr();
+
+	if((fp=fopen("trans1","a+"))==NULL)
+	{
+	printf("Cannot open file");
+	exit(1);
+	}
+
+	if((fp2=fopen("account","r+w"))==NULL)
+	{
+	printf("Cannot open file");
+	exit(1);
+	}
+
+	printf("Enter Account no. : ");
+	scanf("%ld",&t1.account_no);
+	found='n';
+	val_flag='n';
+	rewind(fp2);
+
+	while((fread(&c1,sizeof(struct cust),1,fp2))==1 && found=='n')
+	{
+	if(c1.account_no==t1.account_no)
+	{
+	found='y';
+	break;
+	}
+	}
+	if(found=='y')
+	{
+	fflush(stdin);
+	printf("Enter date ");
+	gets(t1.date);
+	printf("Enter Amount ");
+	scanf("%ld",&t1.amount);
+	strcpy(t1.t_type,"Withdrawl");
+
+	fwrite(&t1,sizeof(struct trans),1,fp);
+
+	c1.balance=c1.balance-t1.amount;
+	val_flag='y';
+	fwrite(&t1,sizeof(struct trans),1,fp);
+	fseek(fp2,(long)(-size),1);
+	fwrite(&c1,sizeof(struct cust),1,fp2);
+	}
+	fclose(fp);
+	fclose(fp2);
+}
+
+void trans_disp()
+{
+	FILE *fp;
+	struct trans t1;
+	clrscr();
+
+	if((fp=fopen("trans1","r"))==NULL)
+	{
+	printf("Cannot open file");
+	exit(1);
+	}
+
+	printf("Account no\tDate\t\tT_Type\t\tAmount");
+	while((fread(&t1,sizeof(struct trans),1,fp))==1)
+	{
+	printf("\n%ld\t\t%s\t%s\t\t%ld",t1.account_no,t1.date,t1.t_type,t1.amount);
+	}
+	fclose(fp);
+	getch();
+
+
+}
+
+void main()
+{
+	int a;
+	struct c1;
+	struct t1;
+
+	while(a!=0)
+	{
+	clrscr();
+	
+	printf("Select choice from menu\n1. Customer Details\n2. Withdrawl\n3. Deposit\n4. Display All                	Records\n5. Display All Transactions\n0 to Exit\n");
+	
+	printf("Enter Choice : ");
+	scanf("%d",&a);
+	if(a==1)
+	cust_detail();
+	else if(a==2)
+	withdrawl();
+	else if(a==3)
+	deposit();
+	else if(a==4)
+	disp();
+	else if(a==5)
+	trans_disp();
+	}
+
+}
